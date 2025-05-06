@@ -1,0 +1,323 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="4Fly - Soluções com drones para energia solar: inspeção de painéis, monitoramento de usinas e produção de conteúdo audiovisual sustentável.">
+    <meta name="keywords" content="energia solar, drones, inspeção de painéis solares, conteúdo audiovisual, sustentabilidade, energia limpa">
+    <meta name="author" content="4Fly Team">
+    <title>4Fly - Soluções em Energia Solar com Drones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(90deg, #28a745, #1f7a33);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        nav .logo img {
+            height: 40px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #b3ffb3;
+        }
+
+        .hero {
+            background: #f0f0f0;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #1f7a33;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+        }
+
+        .section {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .services-grid, .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .service-card, .team-card {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .service-card:hover, .team-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-card h3, .team-card h3 {
+            font-size: 1.5rem;
+            color: #1f7a33;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .contact-form button {
+            background: #28a745;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .contact-form button:hover {
+            background: #1f7a33;
+        }
+
+        footer {
+            background: #1f7a33;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <!-- Logo: Blue drone icon with "4FLY" text in bold below it -->
+                <img src="https://xai-artifact-39a81ed3-9ce8-4b79-b996-cd88dcf9885e.s3.amazonaws.com/logo-4fly-drones-solar-panels.png" alt="4Fly Logo">
+            </div>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Serviços</a></li>
+                <li><a href="#about">Sobre</a></li>
+                <li><a href="#team">Equipe</a></li>
+                <li><a href="#contact">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div>
+            <h1>4Fly - Inovação para Energia Limpa</h1>
+            <p>Soluções com drones para inspeção de painéis solares e produção audiovisual sustentável.</p>
+        </div>
+    </section>
+
+    <section id="services" class="section">
+        <h2>Nossos Serviços</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Inspeção Aérea</h3>
+                <p>Imagens térmicas e visuais para detectar falhas e otimizar sistemas solares.</p>
+            </div>
+            <div class="service-card">
+                <h3>Monitoramento de Obras</h3>
+                <p>Acompanhamento visual do progresso de usinas solares com relatórios detalhados.</p>
+            </div>
+            <div class="service-card">
+                <h3>Conteúdo Audiovisual</h3>
+                <p>Vídeos institucionais e promocionais para campanhas de energia limpa.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section">
+        <h2>Sobre a 4Fly</h2>
+        <p>A 4Fly é uma startup que combina tecnologia, audiovisual e sustentabilidade, oferecendo serviços de inspeção e monitoramento de sistemas solares com drones, além de produção de conteúdo para promover energia limpa. Nosso compromisso é com a inovação e o impacto ambiental positivo, alinhado ao ODS 7 – Energia Limpa e Acessível.</p>
+    </section>
+
+    <section id="team" class="section">
+        <h2>Nossa Equipe</h2>
+        <div class="team-grid">
+            <div class="team-card">
+                <h3>Eduardo Martins</h3>
+                <p>Gestão técnica e suporte estratégico.</p>
+            </div>
+            <div class="team-card">
+                <h3>Ryan Santos</h3>
+                <p>Marketing digital e relacionamento com clientes.</p>
+            </div>
+            <div class="team-card">
+                <h3>Luiz Miguel</h3>
+                <p>Piloto de drone e captação audiovisual.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <h2>Entre em Contato</h2>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+            <label for="name">Nome</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Mensagem</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit">Enviar</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>© 2025 4Fly. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            alert(`Mensagem enviada!\nNome: ${name}\nE-mail: ${email}\nMensagem: ${message}`);
+            event.target.reset();
+        }
+    </script>
+</body>
+</html>
